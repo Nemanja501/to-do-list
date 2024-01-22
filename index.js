@@ -43,6 +43,13 @@ class ToDoService{
         this.saveToLocalStorage();
     }
 
+    static markAsFinished(id){
+        this.selectedItem = this.items.find((item) => item.itemId === id);
+        this.selectedItem.isFinished = !this.selectedItem.isFinished;
+        this.selectedItem.renderItem();
+        this.saveToLocalStorage();
+    }
+
     static saveToLocalStorage(){
         const json = JSON.stringify(this.items);
         localStorage.setItem('items', json);
@@ -52,16 +59,16 @@ class ToDoService{
         const getItems = localStorage.getItem('items');
         const loadedItems = JSON.parse(getItems);
         loadedItems.forEach(listItem => {
-            this.items.push(new ListItem(listItem.text));
+            this.items.push(new ListItem(listItem.text, listItem.isFinished));
         });
     }
 }
 
 class ListItem{
     static id = 0;
-    constructor(text){
+    constructor(text, isFinished = false){
         this.text = text;
-        this.isFinished = false;
+        this.isFinished = isFinished;
         this.itemId = ListItem.id;
         ListItem.id ++;
         this.renderItem();
@@ -72,7 +79,7 @@ class ListItem{
             this.el = document.createElement("li");
             this.span = document.createElement("span");
             this.el.appendChild(this.span);
-            this.span.addEventListener('click', () => this.markAsFinished());
+            this.span.addEventListener('click', () => ToDoService.markAsFinished(this.itemId));
             list.appendChild(this.el);
         }
         this.span.innerText = this.text;
@@ -114,11 +121,6 @@ class ListItem{
 
     removeItem(){
         this.el.remove();
-    }
-
-    markAsFinished(){
-        this.isFinished = !this.isFinished;
-        this.renderItem();
     }
 }
 
